@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>World Currency Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="text-2xl font-bold text-blue-600">Currency Converter</div>
+                <div class="flex space-x-6">
+                    <a href="/" class="text-gray-700 hover:text-blue-600 font-medium {% if request.path == '/' %}text-blue-600 border-b-2 border-blue-600{% endif %}">
+                        Home
+                    </a>
+                   
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Converter Card -->
+            <div class="lg:w-1/2">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h1 class="text-2xl font-bold text-center mb-6">
+                        International Currency Converter
+                    </h1>
+
+                    <!-- Live Exchange Rate Display -->
+                    <div id="liveRateDisplay" class="mb-4 p-3 bg-blue-50 rounded-lg text-center hidden">
+                        <p class="text-sm text-gray-600">Current Exchange Rate: 
+                            <span id="exchangeRateValue" class="font-semibold"></span>
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1" id="lastUpdated"></p>
+                    </div>
+
+                    <form method="POST" class="space-y-4" id="converterForm">
+                        <div class="relative">
+                            <input
+                                type="number"
+                                step="any"
+                                name="amount"
+                                id="amountInput"
+                                value="{{ amount }}"
+                                placeholder="Enter amount"
+                                required
+                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                            >
+                            <button type="button" onclick="clearAmount()" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                                ✕
+                            </button>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <select name="from_currency" id="fromCurrency" required
+                                class="w-1/2 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                onchange="swapCurrencies(); updateLiveRate()">
+                                {% for cur in currencies %}
+                                    <option value="{{ cur }}" {% if cur == from_currency %}selected{% endif %}>
+                                        {{ cur }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            
+                            <button type="button" onclick="swapCurrencies()" 
+                                    class="p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                                ↔
+                            </button>
+                            
+                            <select name="to_currency" id="toCurrency" required
+                                class="w-1/2 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                onchange="updateLiveRate()">
+                                {% for cur in currencies %}
+                                    <option value="{{ cur }}" {% if cur == to_currency %}selected{% endif %}>
+                                        {{ cur }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Quick Amount Buttons -->
+                        <div class="grid grid-cols-4 gap-2">
+                            <button type="button" onclick="setAmount(10)" class="p-2 bg-gray-100 rounded hover:bg-gray-200">10</button>
+                            <button type="button" onclick="setAmount(50)" class="p-2 bg-gray-100 rounded hover:bg-gray-200">50</button>
+                            <button type="button" onclick="setAmount(100)" class="p-2 bg-gray-100 rounded hover:bg-gray-200">100</button>
+                            <button type="button" onclick="setAmount(1000)" class="p-2 bg-gray-100 rounded hover:bg-gray-200">1000</button>
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="w-80 bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-500 transition-colors">
+                            Convert
+                        </button>
+                    </form>
+
+                    {% if result %}
+                        <div class="w-80 mt-6 bg-gray-100 p-4 rounded-lg text-center">
+                            <p class="font-semibold">Converted Amount</p>
+                            <p class="text-xl font-bold">
+                                {{ result }} {{ to_currency }}
+                            </p>
+                            <button onclick="copyToClipboard('{{ result }}')" 
+                                    class="mt-2 px-4 py-1 bg-g-200 rounded text-sm">
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Popular Conversions -->
+            <div class="lg:w-1/2">
+                <div class="bg-white p-8 rounded-xl shadow-lg h-full">
+                    <h2 class="text-xl text-blue-600 font-bold mb-6">Popular Conversions</h2>
+                    <div id="popularConversions" class="space-y-3">>
+                    </div>
+                
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='javascript.js') }}"></script>
+</body>
+</html>
