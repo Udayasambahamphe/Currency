@@ -8,7 +8,7 @@ API_URL = "https://open.er-api.com/v6/latest/USD"
 
 rates_cache = {}
 last_fetch_time = 0
-CACHE_DURATION = 60 * 60   # 1 hour
+CACHE_DURATION = 60 * 60   
 
 def get_currencies_and_rates():
     global rates_cache, last_fetch_time
@@ -32,12 +32,15 @@ def index():
     to_currency = "NPR"
 
     if request.method == "POST":
-        amount = float(request.form["amount"])
-        from_currency = request.form["from_currency"]
-        to_currency = request.form["to_currency"]
+      data = request.get_json()
 
-        usd_amount = amount / rates[from_currency]
-        result = usd_amount * rates[to_currency]
+      amount = float(data["amount"])
+      from_currency = data["from_currency"]
+      to_currency = data["to_currency"]
+
+      usd_amount = amount / rates[from_currency]
+      result = usd_amount * rates[to_currency]
+
 
     return render_template(
         "index.html",
@@ -49,4 +52,5 @@ def index():
     )
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    # EC2: listen on all interfaces, port 8000
+    app.run(host="0.0.0.0", port=8000, debug=False)
